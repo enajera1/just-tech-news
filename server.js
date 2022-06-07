@@ -13,6 +13,7 @@ app.use(routes);
 
 // turn on connection to db and server
 //'sequelize is from connection file
+// 'force: ?' if true, restarts db everytime server is started. Compare to "DROP TABLE ___ IF EXISTS"
 sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => console.log('Now listening'));
 });
