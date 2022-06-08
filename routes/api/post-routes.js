@@ -4,6 +4,7 @@ const sequelize = require('../../config/connection'); //Need it to set up visual
 
 // get all users
 router.get('/', (req, res) => {
+  console.log('======================');
   Post.findAll({
     // Query configuration
     attributes: ['id',
