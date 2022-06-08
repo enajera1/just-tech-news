@@ -1,12 +1,18 @@
 const router = require('express').Router();
-const { Post, User } = require('../../models');
+const { Post, User, Vote } = require('../../models');
+const sequelize = require('../../config/connection'); //Need it to set up visualization of vote count
 
 // get all users
 router.get('/', (req, res) => {
-  console.log('===============');
   Post.findAll({
     // Query configuration
-    attributes: ['id', 'post_url', 'title', 'created_at'], //In Post.js, "underscored: true". Sequelize camelcases by default
+    attributes: ['id',
+    'post_url',
+    'title', 
+    'created_at',
+    [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']  
+    ], // This gets vote count posted. 
+     //In Post.js, "underscored: true". Sequelize camelcases by default
     order: [['created_at', 'DESC']],  
     include: [
       {
@@ -20,6 +26,7 @@ router.get('/', (req, res) => {
     console.log(err);
     res.status(500).json(err);
   });
+});
 
   // Get a single post
   router.get('/:id', (req, res) => {
@@ -27,7 +34,13 @@ router.get('/', (req, res) => {
       where: {
         id: req.params.id
       },
-      attributes: ['id', 'post_url', 'title', 'created_at'],
+      attributes: ['id', 
+      'post_url', 
+      'title', 
+      'created_at',
+      [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+      // This gets vote count posted. 
+    ],
       include: [
         {
           model: User,
@@ -42,6 +55,9 @@ router.get('/', (req, res) => {
       }
       res.json(dbPostData);
     })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
   });
 });
 
@@ -58,6 +74,18 @@ router.post('/', (req, res) => {
     console.log(err);
     res.status(500).json(err);
   });
+});
+
+// PUT /api/posts/upvote
+//Must be before '/:id' because if not, express will think "upvote" is a valid id#
+router.put('/upvote', (req, res) => {
+  // custom static method created in models/Post.js
+  Post.upvote(req.body, { Vote })
+    .then(updatedPostData => res.json(updatedPostData))
+    .catch(err => {
+      console.log(err);
+      res.status(400).json(err);
+    });
 });
 
 //Update posts
@@ -85,6 +113,7 @@ router.put('/:id', (req, res) => {
     });
 });
 
+// Delete posts
 router.delete('/:id', (req, res) => {
   Post.destroy({
     where: {
