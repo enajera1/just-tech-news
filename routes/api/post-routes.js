@@ -14,12 +14,20 @@ router.get('/', (req, res) => {
     [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']  
     ], // This gets vote count posted. 
      //In Post.js, "underscored: true". Sequelize camelcases by default
-    order: [['created_at', 'DESC']],  
-    include: [
-      {
-        model: User, //Pull username from other model
-        attributes: ['username']
-      }
+     order: [['created_at', 'DESC']],
+     include: [
+       {
+         model: Comment,
+         attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+         include: {
+           model: User,
+           attributes: ['username']
+         }
+       },
+       {
+         model: User,
+         attributes: ['username']
+       }
     ]
   })
   .then(dbPostData => res.json(dbPostData))
@@ -42,12 +50,20 @@ router.get('/', (req, res) => {
       [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
       // This gets vote count posted. 
     ],
-      include: [
-        {
+    include: [
+      {
+        model: Comment,
+        attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+        include: {
           model: User,
-          attributes: ['username']  
+          attributes: ['username']
         }
-      ]
+      },
+      {
+        model: User,
+        attributes: ['username']
+      }
+    ]
     })
     .then(dbPostData => {
       if (!dbPostData) {
