@@ -15,7 +15,7 @@ async function loginFormHandler(event) {
     });
 
     if (response.ok) {
-      document.location.replace('/');
+      document.location.replace('/dashboard/');
     } else {
       alert(response.statusText);
     }
@@ -41,7 +41,7 @@ async function signupFormHandler(event) {
     });
 
     if (response.ok) {
-      document.location.replace('/');
+      document.location.replace('/dashboard/');
     } else {
       alert(response.statusText);
     }
@@ -51,4 +51,3 @@ async function signupFormHandler(event) {
 document.querySelector('.login-form').addEventListener('submit', loginFormHandler);
 
 document.querySelector('.signup-form').addEventListener('submit', signupFormHandler);
-
